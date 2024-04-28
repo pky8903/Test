@@ -1,0 +1,23 @@
+#define EIGEN_USE_MKL_ALL
+#include <iostream>
+#include <chrono>
+#include <armadillo>
+
+int main(void)
+{
+	std::cout << "Test arma 1" << std::endl;
+
+    int count = 2000;
+    int col_size = 20;
+    int row_size = 4000;
+
+    arma::matrix random_matrix = arma::randu(row_size, col_size);
+    
+    std::vector<arma::vec> random_vectors(row_size); 
+    arma::vec arma_output1;
+
+    std::vector<double> output2(row_size);
+    std::vector<double> output3(row_size);
+    
+	return 0;
+}

@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/program.dir/test.cc.o CMakeFiles/program.dir/foo.cc.o -o program  lib/libshape.a 
