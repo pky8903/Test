@@ -2,12 +2,15 @@
 #include <iostream>
 #include <eigen3/Eigen/Dense>
 #include <chrono>
+#include <mkl.h>
+#include "test_nomalloc.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 int main(void)
 {
+    mkl_set_num_threads(1);
 	std::cout << "Test Eigen 1" << std::endl;
     
     int count = 2000;
@@ -59,6 +62,7 @@ int main(void)
     std::chrono::duration<double> sec3 = std::chrono::system_clock::now() - start3;
     std::cout << "test3 duration: " << sec3.count() << " s" << std::endl;
     
+    test_nomalloc();
 //    bool all_same = true;
 //    auto std_output1 = std::vector<double>(output1.data(), output1.data() + output1.size());
 //    for (auto i = 0; i < row_size; ++i){

@@ -1,6 +1,6 @@
 CMakeFiles/program.dir/test.cc.o: \
- /home/kyp/Workspace/00.test/00.c_test/test.cc /usr/include/stdc-predef.h \
- /usr/include/c++/11/iostream \
+ /home/kyp/Workspace/00.test/Test/00.c_test/test.cc \
+ /usr/include/stdc-predef.h /usr/include/c++/11/iostream \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -146,4 +146,4 @@ CMakeFiles/program.dir/test.cc.o: \
  /usr/include/c++/11/bits/basic_ios.tcc \
  /usr/include/c++/11/bits/ostream.tcc /usr/include/c++/11/istream \
  /usr/include/c++/11/bits/istream.tcc \
- /home/kyp/Workspace/00.test/00.c_test/includes/foo.h
+ /home/kyp/Workspace/00.test/Test/00.c_test/includes/foo.h

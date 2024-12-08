@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/program.dir/test.cc.o CMakeFiles/program.dir/test_nomalloc.cc.o -o program   -L/opt/intel/oneapi/mkl/latest/lib/intel64  -Wl,-rpath,/opt/intel/oneapi/mkl/latest/lib/intel64 -lmkl_rt -lpthread 

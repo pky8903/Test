@@ -13,7 +13,7 @@ link_directories(${MKLROOT}/lib/intel64)
 find_package(Threads REQUIRED)
 set(MKL_LIBRARIES mkl_rt pthread)
 
-add_executable (program test.cc)
+add_executable (program test.cc test_nomalloc.cc)
 
 target_compile_options(program PUBLIC -Wall -Werror)
 

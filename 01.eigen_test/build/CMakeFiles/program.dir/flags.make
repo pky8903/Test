@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/opt/intel/oneapi/mkl/latest/include
 
-CXX_FLAGS = -Wall -Werror
+CXX_FLAGS = -O3 -DNDEBUG -Wall -Werror
 

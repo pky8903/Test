@@ -1,0 +1,1 @@
+/usr/bin/g++-10  -std=c++17 CMakeFiles/program.dir/main.cu.o CMakeFiles/program.dir/DS_timer.cpp.o -o program   -L/usr/local/cuda/targets/x86_64-linux/lib/stubs  -L/usr/local/cuda/targets/x86_64-linux/lib  -L/usr/lib/gcc/x86_64-linux-gnu/11  -lcudart -lcudadevrt -lcudart_static -lrt -lpthread -ldl 
