@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/kyp/Workspace/00.test/00.c_test/includes
+CXX_INCLUDES = -I/home/kyp/Workspace/00.test/Test/00.c_test/includes
 
 CXX_FLAGS = -Wall -Werror
 

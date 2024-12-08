@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kyp/Workspace/00.test/01.eigen_test
+CMAKE_SOURCE_DIR = /home/kyp/Workspace/00.test/Test/01.eigen_test
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kyp/Workspace/00.test/01.eigen_test/build
+CMAKE_BINARY_DIR = /home/kyp/Workspace/00.test/Test/01.eigen_test/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kyp/Workspace/00.test/01.eigen_test/build/CMakeFiles /home/kyp/Workspace/00.test/01.eigen_test/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kyp/Workspace/00.test/Test/01.eigen_test/build/CMakeFiles /home/kyp/Workspace/00.test/Test/01.eigen_test/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kyp/Workspace/00.test/01.eigen_test/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kyp/Workspace/00.test/Test/01.eigen_test/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -153,6 +153,30 @@ test.cc.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/test.cc.s
 .PHONY : test.cc.s
 
+test_nomalloc.o: test_nomalloc.cc.o
+.PHONY : test_nomalloc.o
+
+# target to build an object file
+test_nomalloc.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/test_nomalloc.cc.o
+.PHONY : test_nomalloc.cc.o
+
+test_nomalloc.i: test_nomalloc.cc.i
+.PHONY : test_nomalloc.i
+
+# target to preprocess a source file
+test_nomalloc.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/test_nomalloc.cc.i
+.PHONY : test_nomalloc.cc.i
+
+test_nomalloc.s: test_nomalloc.cc.s
+.PHONY : test_nomalloc.s
+
+# target to generate assembly for a file
+test_nomalloc.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/test_nomalloc.cc.s
+.PHONY : test_nomalloc.cc.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -165,6 +189,9 @@ help:
 	@echo "... test.o"
 	@echo "... test.i"
 	@echo "... test.s"
+	@echo "... test_nomalloc.o"
+	@echo "... test_nomalloc.i"
+	@echo "... test_nomalloc.s"
 .PHONY : help
 
 

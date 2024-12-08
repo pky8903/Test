@@ -1,4 +1,4 @@
-# Install script for directory: /home/kyp/Workspace/00.test/00.c_test/lib
+# Install script for directory: /home/kyp/Workspace/00.test/Test/00.c_test/lib
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
