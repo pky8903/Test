@@ -9,6 +9,7 @@
 #include <thrust/functional.h>
 #include <thrust/tuple.h>
 #include <cuComplex.h>
+#include <nvtx3/nvToolsExt.h>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "DS_timer.h"
@@ -147,8 +148,8 @@ int main(void)
     setTimer();
     
     // Data size
-    const int width = 1024*2;     // 256 for calibration, 1024, 2048, 4096 for simulation     
-    const int height = 1024*2;    // 256 for calibration, 1024, 2048, 4096 for simulation
+    const int width = 1024*4;     // 256 for calibration, 1024, 2048, 4096 for simulation     
+    const int height = 1024*4;    // 256 for calibration, 1024, 2048, 4096 for simulation
     const int size = width * height;
 
     // Kernel info
@@ -225,18 +226,22 @@ int main(void)
     timer.offTimer(2);
 
     timer.onTimer(1);
+    nvtxRangePush("Main algorithm");
     // main algorithm (to be accelerated by utilizing TensorCore)
     // : AI = Sum of ( w_i * abs(IFFT{ FFT{MI} * K_i }) * abs(IFFT{ FFT{MI} * K_i }) )
 
     std::cout << "Start computing the main algorithm" << std::endl;
     // 1. Fourier transform of MI
+    nvtxRangePush("CUFFT MI");
     cufftHandle plan;
     checkCufft(cufftPlan2d(&plan, height, width, CUFFT_C2C), "cufftPlan2d");
     checkCufft(cufftExecC2C(plan, d_mi, d_mi_fft, CUFFT_FORWARD), "cufftExecC2C (Forward)");
+    nvtxRangePop();
     
     // 2. TCC convolution
     for (auto i = 0; i < n_terms; ++i) {
         // FFT convolution
+        nvtxRangePush("Fourier domain multiplication");
         thrust::device_ptr<cuFloatComplex> t_kernel(d_kernels[i]);
         thrust::device_ptr<cuFloatComplex> t_mi_fft(d_mi_fft);
         thrust::device_ptr<cuFloatComplex> t_buffer(d_buffer);
@@ -247,12 +252,16 @@ int main(void)
             , t_buffer
             , vectorMul()
         );       
+        nvtxRangePop();
 
+        nvtxRangePush("CUFFT IFFT");
         checkCufft(cufftExecC2C(plan, d_buffer, d_buffer, CUFFT_INVERSE), "cufftExecC2C (Inverse)");
+        nvtxRangePop();
 
         // accumulation 
         // ai += weight_i * abs(d_buffer)*abs(d_buffer)
                 
+        nvtxRangePush("Accumulation");
         thrust::device_ptr<float> t_ai(d_ai);
         auto begin = thrust::make_zip_iterator(
             thrust::make_tuple(t_ai, t_buffer)
@@ -266,9 +275,11 @@ int main(void)
             , t_ai
             , aiAccumulator(eigen_values[i]/size)
             );
+        nvtxRangePop();
     }
 
     timer.offTimer(1);
+    nvtxRangePop();
     std::cout << "main algorithm finished!" << std::endl;
 
     // Device-to-host copy
