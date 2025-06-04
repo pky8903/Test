@@ -1,0 +1,175 @@
+XX^X^X#include <cstdio>
+#include <iostream>
+#include <cufft.h>
+#include <cuda_runtime.h>
+#include <vector>
+
+#include "device_launch_parameters.h"
+#include "matplotlibcpp.h"
+
+#define cudaCheckError() {                                  \
+    cudaError_t e = cudaGetLastError();                     \
+    if (e != cudaSuccess) {                                 \
+        printf("CUDA error %s %d: %s\n",                    \
+            __FILE__, __LINE__, cudaGetErrorString(e));     \
+        exit(EXIT_FAILURE);                                 \
+    }                                                       \
+}                                                           \
+
+namespace plt = matplotlibcpp;
+
+void checkDeviceMemory(void)
+{
+    size_t free, total;
+    cudaMemGetInfo(&free, &total);
+    std::cout << "Device memory (free/total) = " << free << "/" << total << "bytes\n" << std::endl;
+}
+
+void setGrid(
+    std::vector<float>& x
+    , std::vector<float>& k
+    , float dx, float dk
+    , const int N
+    )
+{
+    for (auto i = 0; i < N; ++i) {
+        x[i] = (i - N / 2) * dx;
+        k[i] = (i - N / 2) * dk; 
+    }
+}
+
+void generateGaussian(
+    std::vector<float>& data
+    , float dx
+    , float sigma) 
+{
+    int N = data.size();
+    for (auto i = 0; i < N; ++i) {
+        auto x = (i - N / 2) * dx;
+        data[i] = expf(-x * x / (2.f * sigma * sigma));
+    }
+}
+
+__global__ void toComplex(const float* data, cufftComplex* out, int N) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < N) {
+        out[i].x = data[i];
+        out[i].y = 0.f;
+    }
+}
+
+template<typename T>
+__global__ void fftshift(T* data, int N) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < N / 2) {
+        T tmp = data[i];
+        data[i] = data[i + N / 2];
+        data[i + N / 2] = tmp;
+    }
+}
+
+// in-place
+template<typename T>
+void api_fftshift(T* input, const int size, cudaStream_t stream) {
+    int block_size = 128;
+    int grid_shift = (size / 2 + block_size - 1) / block_size;
+    fftshift<<<grid_shift, block_size, 0, stream>>>(input, size); // which one is faster? thrust? or this?
+}
+
+// out-of-place
+void api_makeComplex(const float* in, cufftComplex* out, const int size, cudaStream_t stream) {
+    int block_size = 128;
+    int grid_size = (size + block_size - 1) / block_size;
+    toComplex<<<grid_size, block_size, 0, stream>>>(in, out, size);
+}
+ 
+// out-of-place
+void api_fftC2C(cufftComplex* in, cufftComplex* out, const int size, int direction, cudaStream_t stream) {
+    cufftHandle plan;
+    cufftPlan1d(&plan, size, CUFFT_C2C, 1);
+    cufftSetStream(plan, stream);
+    cufftExecC2C(plan, in, out, direction);
+    cufftDestroy(plan);
+} 
+
+constexpr double pi = 3.141592655358979323846;
+
+int main(void)
+{
+    // data preparation 
+    const int N = 128;
+    const float dx = 8.f;
+    const float sigma = 40.f;
+    const float width = dx * N;
+    const float dk = 2.f * pi / (dx * N);
+
+    auto h_x = std::vector<float>(N);
+    auto h_k = std::vector<float>(N);
+    setGrid(h_x, h_k, dx, dk, N);
+
+    auto h_input = std::vector<float>(N);
+    generateGaussian(h_input, dx, sigma);
+
+    // plot
+//    plt::plot(h_x, h_input);
+//    plt::show();
+    
+    // cuda stream
+    cudaStream_t stream;
+    cudaStreamCreate(&stream);
+
+    // gpu memory allocation
+    float* d_input = nullptr;
+    cufftComplex* d_output = nullptr;
+    cudaMallocAsync(&d_input, sizeof(float) * N, stream);
+    cudaMallocAsync(&d_output, sizeof(cufftComplex) * N, stream);
+    cudaMemcpyAsync(d_input, h_input.data(), sizeof(float) * N, cudaMemcpyHostToDevice, stream);
+
+    // fftshift
+    api_fftshift<float>(d_input, N, stream);
+    
+    // make complex
+    cufftComplex* d_cplx_input = nullptr;
+    cudaMallocAsync(&d_cplx_input, sizeof(cufftComplex) * N, stream);
+    api_makeComplex(d_input, d_cplx_input, N, stream);
+
+    // fft
+    api_fftC2C(d_cplx_input, d_output, N, CUFFT_FORWARD, stream);
+
+    // fftshift
+    api_fftshift<cufftComplex>(d_output, N, stream); 
+
+    // copy to host
+    std::vector<cufftComplex> h_fk(N);
+    cudaMemcpyAsync(h_fk.data(), d_output, sizeof(cufftComplex) * N, cudaMemcpyDeviceToHost, stream); 
+    
+    cudaStreamSynchronize(stream);
+
+    // cplx_host to real_host
+    std::vector<float> h_fk_real(N);
+    std::vector<float> h_fk_imag(N);
+    for (auto i = 0u; i < h_fk.size(); ++i) {
+        h_fk_real[i] = h_fk[i].x;
+        h_fk_imag[i] = h_fk[i].y;
+    }
+
+    std::vector<float> h_fk_theory(N);
+    generateGaussian(h_fk_theory, dk, 1.f/sigma);
+
+    for (auto i = 0u; i < N; ++i) {
+        std::cout << "h_fk[" << i << "]: " << dx * h_fk_real[i] << std::endl;
+        std::cout << "h_fk_theory[" << i << "]: " << sqrt(2.f * pi * sigma * sigma) * h_fk_theory[i] << std::endl;
+    }
+    
+    // plot
+    plt::plot(h_k, h_fk_real);
+    plt::show();
+
+    // clean up
+    cudaFreeAsync(d_input, stream);    
+    cudaFreeAsync(d_cplx_input, stream);    
+    cudaFreeAsync(d_output, stream);    
+
+    return 0;
+}
+
