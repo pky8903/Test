@@ -1,0 +1,1 @@
+/usr/bin/g++ CMakeFiles/test.dir/main.cu.o -o test  -lcudart -lcublas -lcublasLt -lcufft -lcudadevrt -lcudart_static -lrt -lpthread -ldl  -L"/usr/local/cuda/targets/x86_64-linux/lib/stubs" -L"/usr/local/cuda/targets/x86_64-linux/lib"

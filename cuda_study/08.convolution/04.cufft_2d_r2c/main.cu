@@ -406,7 +406,7 @@ int main(int argc, char* argv[])
     const float sigma = 9.f;
     const float width = dx * N;
     const float dk = 2.f * pi / (dx * N);
-    const float x0 = 0.f * dx;
+    const float x0 = 3.f * dx;
     const float y0 = 0.f * dx;
     
     auto normalize_factor = [](const float sigma) {
