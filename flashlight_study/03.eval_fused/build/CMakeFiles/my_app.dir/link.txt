@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/my_app.dir/main.cc.o -o my_app  -Wl,-rpath,/usr/local/lib:/usr/local/cuda/lib64 -lflashlight /usr/local/lib/libaf.so.3.10.0 /usr/local/lib/libafcuda.so.3.10.0 /usr/local/cuda/lib64/libcudart.so /usr/lib/x86_64-linux-gnu/libcudnn.so /usr/local/cuda/lib64/libnvToolsExt.so 

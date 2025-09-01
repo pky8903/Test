@@ -1,0 +1,43 @@
+#include <cstdio>
+#include <iostream>
+#include <cufft.h>
+#include <cuda_runtime.h>
+#include <vector>
+#include <stdexcept>
+
+#include "gpuTimer.h"
+
+#define cudaCheckError() {                                  \
+    cudaError_t e = cudaGetLastError();                     \
+    if (e != cudaSuccess) {                                 \
+        printf("CUDA error %s %d: %s\n",                    \
+            __FILE__, __LINE__, cudaGetErrorString(e));     \
+        exit(EXIT_FAILURE);                                 \
+    }                                                       \
+}                                                           \
+
+int main()
+{
+    int N_large = 2048;
+    int N_tile = 1024;
+    int erosion = 10;
+    int out_large = N_large - 2 * erosion;
+    int tile_stride = N_tile - 2 * erosion;
+
+    int num_tiles = (N_large + N_tile - 4 * erosion - 1) / (N-tile - 2 * erosion);
+    
+    std::cout << "info: " << "\n"
+        << "input size: " << N_large << "\n"
+        << "tile size: " << N_tile << "\n"
+        << "erosion size: " << erosion << "\n"
+        << "output size: " << out_large << "\n"
+        << "number of tiles: " << num_tiles << "\n"
+        << "tile stride: " << tile_stride << "\n"
+        << std::endl;
+
+    // GPU memory alloction
+    cudaMallocAsync(&d_shifted_input, sizeof(float) * size, stream);
+     
+
+    return 0;
+}
